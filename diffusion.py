@@ -17,6 +17,7 @@ p3=1-p2-p1
 
 
 def get_preprocessed_network(network_type="WS", N=4000, avg_k=22, S_percent=0.3):
+    cur=5
     if network_type == "BA":
         m = avg_k // 2
         G = nx.barabasi_albert_graph(n=N, m=m)
@@ -39,33 +40,34 @@ def get_preprocessed_network(network_type="WS", N=4000, avg_k=22, S_percent=0.3)
     return G,spreader
 
 def diffusion(G,spreader,N):
-    level=set()
+    cur=5
     while spreader:
+        level=set()
         for u in spreader:
             for v in G[u]:
                 cur=(a*cur+c)%N
-                if G[v]["state"]=='U' and (cur/N)<G[v]['threshold']:
-                    G[v]["state"]='K'
-                elif G[v]["state"]=='U':
+                if G.nodes[v]["state"]=='U' and (cur/N)<G.nodes[v]['threshold']:
+                    G.nodes[v]["state"]='K'
+                elif G.nodes[v]["state"]=='U':
                     cur=(a*cur+c)%N
-                    if (cur/N)<p1*(1-G[v]['threshold']):
-                        G[v]["state"]="S"
+                    if (cur/N)<p1*(1-G.nodes[v]['threshold']):
+                        G.nodes[v]["state"]="S"
                         level.add(v)
                     else:
-                        G[v]["state"]="H"
-                elif G[v]["state"]=='H':
+                        G.nodes[v]["state"]="H"
+                elif G.nodes[v]["state"]=='H':
                     cur=(a*cur+c)%N
                     if (cur/N)<p2:
-                        G[v]["state"]="S"
+                        G.nodes[v]["state"]="S"
                         level.add(v)
                     else:
-                        G[v]["state"]='K'
+                        G.nodes[v]["state"]='K'
                 cur=(a*cur+c)%N
                 if (cur/N)<p3:
-                    G[u]["state"]='K'
+                    G.nodes[u]["state"]='K'
                 else:
                     level.add(u)
         spreader=level
     
 G,spreader=get_preprocessed_network()
-diffusion(G,spreader)
+diffusion(G,spreader,4000)
