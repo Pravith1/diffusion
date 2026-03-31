@@ -1,8 +1,9 @@
 import networkx as nx
-N=4000
-a=1534
-c=54424
-cur=5
+import csv
+cur=534
+a = 1103515245
+c = 12345
+N = 2147483648
 #first probability
 cur=a*cur+c
 cur%=N
@@ -16,58 +17,78 @@ p2=p2*nex
 p3=1-p2-p1
 
 
-def get_preprocessed_network(network_type="WS", N=4000, avg_k=22, S_percent=0.3):
-    cur=5
-    if network_type == "BA":
-        m = avg_k // 2
-        G = nx.barabasi_albert_graph(n=N, m=m)
-    elif network_type == "WS":
-        G = nx.watts_strogatz_graph(n=N, k=avg_k, p=0.6)
+def get_preprocessed_network(S_percent=0.05):
+    cur=534
+    a = 1103515245
+    b = 12345
+    m = 2147483648
+    G=nx.DiGraph()
+    N=0
+    with open(r"D:\Diffusion\pokec_sample_10k.csv","r") as f:
+        reader=csv.reader(f)
+        for row in reader:
+            if not row:continue
+            if row[0]=='unique':
+                N=int(row[1])
+                continue
+            G.add_edge(int(row[0]),int(row[1]))
+    degree={}
+    with open(r"D:\Diffusion\full_degrees.csv",'r') as f:
+        reader=csv.reader(f)
+        next(reader)
+        for row in reader:
+            if not row:continue
+            degree[int(row[0])]=int(row[1])
     for node in G.nodes():
-        G.nodes[node]['degree'] = G.degree(node)
-        G.nodes[node]['state'] = 'U'
-        G.nodes[node]['threshold']=(G.degree(node)/(N-1))**(1/3)
+        G.nodes[node]['degree']=degree[node]
+        G.nodes[node]['state']='U'
+        G.nodes[node]["threshold"]=(degree[node]/(N-1))**(1/3)
     arr=list(G.nodes())
-    
+    print("no of nodes",len(arr))
     spreader=set()
     for i in range(int(S_percent*len(arr))):
-        cur= a*cur +c
+        cur= a*cur +b
         cur%=len(arr)
         cur=i+(cur%(len(arr)-i))
         arr[i],arr[cur]=arr[cur],arr[i]
         G.nodes[arr[i]]['state']='S'
         spreader.add(arr[i])
-    return G,spreader
+    return G,spreader,N
 
 def diffusion(G,spreader,N):
+    m=2147483648
     cur=5
+    print(len(spreader))
+    flag=0
     while spreader:
         level=set()
         for u in spreader:
+            flag+=1
             for v in G[u]:
-                cur=(a*cur+c)%N
-                if G.nodes[v]["state"]=='U' and (cur/N)<G.nodes[v]['threshold']:
+                cur=(a*cur+c)%m
+                if G.nodes[v]["state"]=='U' and (cur/m)<G.nodes[v]['threshold']:
                     G.nodes[v]["state"]='K'
                 elif G.nodes[v]["state"]=='U':
-                    cur=(a*cur+c)%N
-                    if (cur/N)<p1*(1-G.nodes[v]['threshold']):
+                    cur=(a*cur+c)%m
+                    if (cur/m)<p1*(1-G.nodes[v]['threshold']):
                         G.nodes[v]["state"]="S"
                         level.add(v)
                     else:
                         G.nodes[v]["state"]="H"
                 elif G.nodes[v]["state"]=='H':
-                    cur=(a*cur+c)%N
-                    if (cur/N)<p2:
+                    cur=(a*cur+c)%m
+                    if (cur/m)<p2:
                         G.nodes[v]["state"]="S"
                         level.add(v)
                     else:
                         G.nodes[v]["state"]='K'
-                cur=(a*cur+c)%N
-                if (cur/N)<p3:
+                cur=(a*cur+c)%m
+                if (cur/m)<p3:
                     G.nodes[u]["state"]='K'
-                else:
-                    level.add(u)
         spreader=level
-    
-G,spreader=get_preprocessed_network()
-diffusion(G,spreader,4000)
+    count=0
+    for node in G.nodes:
+        count+=int(G.nodes[node]["state"] in ("K","S"))
+    print(count)
+G,spreader,N=get_preprocessed_network()
+diffusion(G,spreader,N)

@@ -1,0 +1,12 @@
+# Ignore the massively large original dataset file
+soc-Pokec.mtx
+*.mtx
+*.txt
+*.zip
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# DO NOT ignore these specific created files
+!pokec_sample_10k.csv
+!full_degrees.csv
