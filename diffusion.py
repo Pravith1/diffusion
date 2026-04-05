@@ -115,4 +115,4 @@ def diffusion(G,spreader,N,info):
         count+=int(G.nodes[node]["state"] in ("K","S"))
     print(count)
 G,spreader,N=get_preprocessed_network("forest_fire",0.01)
-diffusion(G,spreader,N,[0,1,1])
+diffusion(G,spreader,N,[0,0,1])

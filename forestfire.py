@@ -1,6 +1,27 @@
 import itertools
 from collections import deque
 import csv
+
+music_pos=["pop", "rock", "rap", "metal", "hip", "hop", "house", "techno", "dance", "vsetko", "hudba", "vsetky"]
+music_neg=["nepocuvam", "ziadna", "nic", "nie", "ziadne", "nezaujima"]
+
+movies_pos=["komedie", "akcne", "horory", "romanticke", "sci-fi", "thrillery", "dokumentarne", "historicke", "vsetko", "filmy", "serialy", "zahadne", "mysteriozne", "vojnove"]
+movies_neg=["nepozeram", "ziadne", "nic", "nie", "nezaujima"]
+
+
+pol_pos=["zaujimam", "ano", "sledujem", "spravy", "pravica", "lavica", "politika", "velmi"]
+pol_neg=["nezaujima", "nenavidim", "hnus", "nic", "nie", "kaslem", "neznasam", "nuda", "fuj"]
+def score_text(text,pos,neg):
+    text=text.lower()
+    if len(text)<3 or text in ("nic","nie","ziadne","null"):
+        return 0.01
+    p = sum(text.count(w) for w in pos)
+    n = sum(text.count(w) for w in neg)
+    if n>p:
+        return 0.01
+    if p>0:
+        return min(0.99,1.0-(0.5**p))
+    return min(0.5,len(text)/100.0)
 Ori_graph = r"D:\Diffusion\soc-Pokec.mtx"
 sampled_graph = r"D:\Diffusion\pokec_forest_fire_10k.csv"
 full_degree = r"D:\Diffusion\full_forest_fire_degrees.csv"
@@ -82,41 +103,26 @@ with open(profiles_user, 'r', encoding='utf-8') as f_u, \
      open(profiles_movies, 'r', encoding='utf-8', errors='ignore') as f_mo, \
      open(profiles_politics, 'r', encoding='utf-8', errors='ignore') as f_po, \
      open(pref_csv, 'w', newline='', encoding='utf-8') as out:
-         
     writer = csv.writer(out)
     writer.writerow(["Node_ID", "Music", "Movies", "Politics"])
-    
     for line in f_u:
         if not line.startswith('%'):
             break 
-            
-
-    for line_u, line_mu, line_mo, line_po in zip(f_u, f_mu, f_mo, f_po):
+    for line_u,line_mu,line_mo,line_po in zip(f_u,f_mu,f_mo,f_po):
         try:
-            user_id = int(line_u.strip())
+            user_id=int(line_u.strip())
         except ValueError:
             continue
-            
         if user_id not in seen:
             continue
-            
-        line_mu = line_mu.strip()
-        line_mo = line_mo.strip()
-        line_po = line_po.strip()
-        
-
-        len_mu = len(line_mu) if line_mu != "null" else 0
-        len_mo = len(line_mo) if line_mo != "null" else 0
-        len_po = len(line_po) if line_po != "null" else 0
-        
-        mu = min(0.99, max(0.01, len_mu / 50.0))
-        mo = min(0.99, max(0.01, len_mo / 50.0))
-        po = min(0.99, max(0.01, len_po / 20.0))
-        
-        writer.writerow([user_id, round(mu, 3), round(mo, 3), round(po, 3)])
+        line_mu=line_mu.strip()
+        line_mo=line_mo.strip()
+        line_po=line_po.strip()
+        mu=score_text(line_mu,music_pos,music_neg)
+        mo=score_text(line_mo,movies_pos,movies_neg)
+        po=score_text(line_po,pol_pos,pol_neg)
+        writer.writerow([user_id,round(mu,3),round(mo,3),round(po,3)])
         pcount += 1
-        
-        if pcount == len(seen):
+        if pcount==len(seen):
             break
-
 print("Preferences saved:", pcount)
