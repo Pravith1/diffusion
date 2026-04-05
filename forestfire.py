@@ -99,11 +99,7 @@ pref_csv = r"D:\Diffusion\pokec_forest_fire_preferences.csv"
 
 pcount = 0
 
-with open(profiles_user, 'r', encoding='utf-8') as f_u, \
-     open(profiles_music, 'r', encoding='utf-8', errors='ignore') as f_mu, \
-     open(profiles_movies, 'r', encoding='utf-8', errors='ignore') as f_mo, \
-     open(profiles_politics, 'r', encoding='utf-8', errors='ignore') as f_po, \
-     open(pref_csv, 'w', newline='', encoding='utf-8') as out:
+with open(profiles_user, 'r', encoding='utf-8') as f_u, open(profiles_music, 'r', encoding='utf-8', errors='ignore') as f_mu, open(profiles_movies, 'r', encoding='utf-8', errors='ignore') as f_mo, open(profiles_politics, 'r', encoding='utf-8', errors='ignore') as f_po, open(pref_csv, 'w', newline='', encoding='utf-8') as out:
     writer = csv.writer(out)
     writer.writerow(["Node_ID", "Music", "Movies", "Politics"])
     for line in f_u:

@@ -89,7 +89,7 @@ def diffusion(G,spreader,N,info):
     history.append({node: G.nodes[node]["state"] for node in G.nodes()})
     while spreader:
         level=set()
-        print(len(spreader))
+        print("no of current spreader node:",len(spreader))
         for u in spreader:
             for v in G[u]:
                 prod=dot_prod(info,G.nodes[v]["prob_array"])
@@ -110,9 +110,11 @@ def diffusion(G,spreader,N,info):
                         level.add(v)
                     else:
                         G.nodes[v]["state"]='K'
-                cur=(a*cur+c)%m
-                if (cur/m)<p3:
-                    G.nodes[u]["state"]='K'
+            cur=(a*cur+c)%m
+            if (cur/m)<p3:
+                G.nodes[u]["state"]='K'
+            else:
+                level.add(u)
         spreader=level
         history.append({node: G.nodes[node]["state"] for node in G.nodes()})
     count=0
@@ -125,12 +127,12 @@ def visualize_network(G, history):
     
     fig, ax = plt.subplots(figsize=(10, 8))
     
-    color_map = {'U': 'green', 'S': 'red', 'H': 'yellow', 'K': 'black'}
+    color_map={'U':'green','S':'red','H':'yellow','K':'black'}
     
     def update(frame):
         ax.clear()
-        current_states = history[frame]
-        node_colors = [color_map[current_states[node]] for node in G.nodes()]
+        current_states=history[frame]
+        node_colors=[color_map[current_states[node]] for node in G.nodes()]
         
         nx.draw(G, pos, 
                 node_color=node_colors, 
@@ -139,14 +141,13 @@ def visualize_network(G, history):
                 width=0.05, 
                 ax=ax)
         
-        ax.set_title(f"Diffusion Step {frame} | U:Gray S:Red H:Yellow K:Black")
-        
-    ani = animation.FuncAnimation(fig, update, frames=len(history), interval=10000, repeat=False)
+        ax.set_title(f"Diffusion Step {frame} | U:Gray S:Red H:Yellow K:Black") 
+    ani=animation.FuncAnimation(fig,update,frames=len(history),interval=10000,repeat=False)
     plt.show()
 type1="reservoir"
 type2="snowball"
 type3="forest_fire"
-G,spreader,N=get_preprocessed_network(type3,0.5)
+G,spreader,N=get_preprocessed_network(type1,0.5)
 history=diffusion(G,spreader,N,[0,0,1])
 print(N)
 if N<=10000:
