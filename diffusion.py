@@ -141,7 +141,7 @@ def visualize_network(G, history):
                 width=0.05, 
                 ax=ax)
         
-        ax.set_title(f"Diffusion Step {frame} | U:Gray S:Red H:Yellow K:Black") 
+        ax.set_title(f"Diffusion Step {frame} | U:Green S:Red H:Yellow K:Black") 
     ani=animation.FuncAnimation(fig,update,frames=len(history),interval=10000,repeat=False)
     plt.show()
 type1="reservoir"
