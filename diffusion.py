@@ -17,14 +17,23 @@ p2=p2*nex
 p3=1-p2-p1
 
 
-def get_preprocessed_network(S_percent=0.05):
+def get_preprocessed_network(random_type,S_percent=0.05):
     cur=534
     a = 1103515245
     b = 12345
     m = 2147483648
     G=nx.DiGraph()
     N=0
-    with open(r"D:\Diffusion\pokec_sample_10k.csv","r") as f:
+    if random_type=="reservoir":
+        sample=r"D:\Diffusion\pokec_sample_10k.csv"
+        full_degree=r"D:\Diffusion\full_degrees.csv"
+    elif random_type=='snowball':
+        sample=r"D:\Diffusion\pokec_snowball_10k.csv"
+        full_degree=r"D:\Diffusion\full_snowball_degrees.csv"
+    else:
+        sample=r"D:\Diffusion\pokec_forest_fire_10k.csv"
+        full_degree=r"D:\Diffusion\full_forest_fire_degrees.csv"
+    with open(sample,"r") as f:
         reader=csv.reader(f)
         for row in reader:
             if not row:continue
@@ -33,12 +42,13 @@ def get_preprocessed_network(S_percent=0.05):
                 continue
             G.add_edge(int(row[0]),int(row[1]))
     degree={}
-    with open(r"D:\Diffusion\full_degrees.csv",'r') as f:
+    with open(full_degree,'r') as f:
         reader=csv.reader(f)
         next(reader)
         for row in reader:
             if not row:continue
             degree[int(row[0])]=int(row[1])
+    avg_degree = sum(degree.values()) / max(1, len(degree))
     for node in G.nodes():
         G.nodes[node]['degree']=degree[node]
         G.nodes[node]['state']='U'
@@ -57,11 +67,11 @@ def get_preprocessed_network(S_percent=0.05):
 
 def diffusion(G,spreader,N):
     m=2147483648
-    cur=5
-    print(len(spreader))
+    cur=546
     flag=0
     while spreader:
         level=set()
+        print(len(spreader))
         for u in spreader:
             flag+=1
             for v in G[u]:
@@ -90,5 +100,5 @@ def diffusion(G,spreader,N):
     for node in G.nodes:
         count+=int(G.nodes[node]["state"] in ("K","S"))
     print(count)
-G,spreader,N=get_preprocessed_network()
+G,spreader,N=get_preprocessed_network("forest_fire",0.0001)
 diffusion(G,spreader,N)
