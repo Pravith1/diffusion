@@ -55,7 +55,7 @@ print(maxi)
 seen={maxi}
 count=1
 q=deque([maxi])
-limit=10000
+limit=1000
 while count<limit:
     i=q.popleft()
     for j in adj[i]:
@@ -64,6 +64,7 @@ while count<limit:
         if (cur_rand/m)>0.5:continue
         seen.add(j)
         count+=1
+        if count==limit:break
         q.append(j)
     if len(q)==0:
         q.append(seen.pop())

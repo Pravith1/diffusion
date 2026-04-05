@@ -1,5 +1,7 @@
 import networkx as nx
 import csv
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 cur=534
 a = 1103515245
 c = 12345
@@ -53,7 +55,8 @@ def get_preprocessed_network(random_type,S_percent=0.05):
         reader=csv.reader(f)
         next(reader)
         for node,music,movies,politics in reader:
-            G.nodes[int(node)]["prob_array"]=[float(music),float(movies),float(politics)]
+            if int(node) in G:
+                G.nodes[int(node)]["prob_array"]=[float(music),float(movies),float(politics)]
     degree={}
     with open(full_degree,'r') as f:
         reader=csv.reader(f)
@@ -61,7 +64,6 @@ def get_preprocessed_network(random_type,S_percent=0.05):
         for row in reader:
             if not row:continue
             degree[int(row[0])]=int(row[1])
-    avg_degree = sum(degree.values()) / max(1, len(degree))
     for node in G.nodes():
         G.nodes[node]['degree']=degree[node]
         G.nodes[node]['state']='U'
@@ -83,6 +85,8 @@ def get_preprocessed_network(random_type,S_percent=0.05):
 def diffusion(G,spreader,N,info):
     m=2147483648
     cur=546
+    history = []
+    history.append({node: G.nodes[node]["state"] for node in G.nodes()})
     while spreader:
         level=set()
         print(len(spreader))
@@ -110,9 +114,40 @@ def diffusion(G,spreader,N,info):
                 if (cur/m)<p3:
                     G.nodes[u]["state"]='K'
         spreader=level
+        history.append({node: G.nodes[node]["state"] for node in G.nodes()})
     count=0
     for node in G.nodes:
         count+=int(G.nodes[node]["state"] in ("K","S"))
     print(count)
-G,spreader,N=get_preprocessed_network("forest_fire",0.01)
-diffusion(G,spreader,N,[0,0,1])
+    return history
+def visualize_network(G, history):
+    pos = nx.spring_layout(G, seed=42)
+    
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    color_map = {'U': 'green', 'S': 'red', 'H': 'yellow', 'K': 'black'}
+    
+    def update(frame):
+        ax.clear()
+        current_states = history[frame]
+        node_colors = [color_map[current_states[node]] for node in G.nodes()]
+        
+        nx.draw(G, pos, 
+                node_color=node_colors, 
+                node_size=10, 
+                with_labels=False, 
+                width=0.05, 
+                ax=ax)
+        
+        ax.set_title(f"Diffusion Step {frame} | U:Gray S:Red H:Yellow K:Black")
+        
+    ani = animation.FuncAnimation(fig, update, frames=len(history), interval=10000, repeat=False)
+    plt.show()
+type1="reservoir"
+type2="snowball"
+type3="forest_fire"
+G,spreader,N=get_preprocessed_network(type3,0.5)
+history=diffusion(G,spreader,N,[0,0,1])
+print(N)
+if N<=10000:
+    visualize_network(G, history)

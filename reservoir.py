@@ -47,17 +47,17 @@ with open(Ori_graph,'r') as f:
                 unique+=1
                 maxi=max(maxi,int(now[0]))
 print(unique)
-limit=unique//10
+limit=10000
 count=0
 final_sample=[[]]
 for i in range(maxi+1):
     if degree[i]==0:continue
-    if len(final_sample[-1])<10000:
+    if len(final_sample[-1])<50:
         final_sample[-1].append(i)
     else:
         nex=(a*cur_rand +b)%m
         cur_rand=nex
-        if nex%count<10000:
+        if nex%count<50:
             degree[final_sample[-1][nex%count]]=0
             final_sample[-1][nex%count]=i
         else:

@@ -51,13 +51,14 @@ with open(Ori_graph,'r') as f:
 seen={maxi}
 count=1
 q=deque([maxi])
-limit=100000
+limit=500
 while count<limit and q:
     i=q.popleft()
     for j in adj[i]:
         if j in seen:continue
         seen.add(j)
         count+=1
+        if count==limit:break
         q.append(j)
 with open(full_degree,'w') as nodes:
     nodes.write("Node_ID,Full_degree\n")
