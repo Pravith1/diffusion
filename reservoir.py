@@ -52,7 +52,7 @@ count=0
 final_sample=[[]]
 for i in range(maxi+1):
     if degree[i]==0:continue
-    if len(final_sample[-1])<50:
+    if len(final_sample[-1])<1000:
         final_sample[-1].append(i)
     else:
         nex=(a*cur_rand +b)%m

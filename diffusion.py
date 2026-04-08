@@ -86,6 +86,7 @@ def diffusion(G,spreader,N,info):
     m=2147483648
     cur=546
     history = []
+    count=0
     history.append({node: G.nodes[node]["state"] for node in G.nodes()})
     while spreader:
         level=set()
@@ -113,14 +114,12 @@ def diffusion(G,spreader,N,info):
             cur=(a*cur+c)%m
             if (cur/m)<p3:
                 G.nodes[u]["state"]='K'
+                count+=1
             else:
                 level.add(u)
         spreader=level
         history.append({node: G.nodes[node]["state"] for node in G.nodes()})
-    count=0
-    for node in G.nodes:
-        count+=int(G.nodes[node]["state"] in ("K","S"))
-    print(count)
+    print("No of nodes recieved the info:",count)
     return history
 def visualize_network(G, history):
     pos = nx.spring_layout(G, seed=42)
@@ -142,13 +141,12 @@ def visualize_network(G, history):
                 ax=ax)
         
         ax.set_title(f"Diffusion Step {frame} | U:Green S:Red H:Yellow K:Black") 
-    ani=animation.FuncAnimation(fig,update,frames=len(history),interval=10000,repeat=False)
+    ani=animation.FuncAnimation(fig,update,frames=len(history),interval=1000,repeat=False)
     plt.show()
 type1="reservoir"
 type2="snowball"
 type3="forest_fire"
-G,spreader,N=get_preprocessed_network(type1,0.5)
-history=diffusion(G,spreader,N,[0,0,1])
-print(N)
+G,spreader,N=get_preprocessed_network(type3,0.01)
+history=diffusion(G,spreader,N,[1,0,0])
 if N<=10000:
     visualize_network(G, history)

@@ -32,7 +32,7 @@ m = 2147483648
 degree=[0]*2000000
 adj=[[] for _ in range(len(degree))]
 unique=0
-maxi=0
+maxx=0
 with open(Ori_graph,'r') as f:
     while 1:
         cur=list(itertools.islice(f,100000))
@@ -46,23 +46,23 @@ with open(Ori_graph,'r') as f:
             if len(now)<2:continue
             degree[int(now[0])]+=1
             adj[int(now[0])].append(int(now[1]))
-            if len(adj[int(now[0])])>len(adj[maxi]):
-                maxi=int(now[0])
-seen={maxi}
+            if len(adj[int(now[0])])>len(adj[maxx]):
+                maxx=int(now[0])
+visited={maxx}
 count=1
-q=deque([maxi])
-limit=500
+q=deque([maxx])
+limit=100000
 while count<limit and q:
     i=q.popleft()
     for j in adj[i]:
-        if j in seen:continue
-        seen.add(j)
+        if j in visited:continue
+        visited.add(j)
         count+=1
         if count==limit:break
         q.append(j)
 with open(full_degree,'w') as nodes:
     nodes.write("Node_ID,Full_degree\n")
-    for node in seen:
+    for node in visited:
         nodes.write(f"{node},{degree[node]}\n")
 s="unique"
 count=0
@@ -77,7 +77,7 @@ with open(Ori_graph,'r') as f,open(sampled_graph,'w') as output:
                 continue
             now=row.split()
             if len(now)<2:continue
-            if int(now[0]) not in seen or int(now[1]) not in seen:
+            if int(now[0]) not in visited or int(now[1]) not in visited:
                 continue
             output.write(f"{int(now[0])},{int(now[1])}\n")
             count+=1
@@ -106,7 +106,7 @@ with open(profiles_user, 'r', encoding='utf-8') as f_u, \
             user_id=int(line_u.strip())
         except ValueError:
             continue
-        if user_id not in seen:
+        if user_id not in visited:
             continue
         line_mu=line_mu.strip()
         line_mo=line_mo.strip()
@@ -116,6 +116,6 @@ with open(profiles_user, 'r', encoding='utf-8') as f_u, \
         po=score_text(line_po,pol_pos,pol_neg)
         writer.writerow([user_id,round(mu,3),round(mo,3),round(po,3)])
         pcount += 1
-        if pcount==len(seen):
+        if pcount==len(visited):
             break
 print("Preferences saved:", pcount)
